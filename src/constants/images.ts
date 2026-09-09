@@ -11,4 +11,5 @@ export const images = {
   // used for font assets in src/theme/fonts.ts.
   mascotLogo: require("@/assets/assets/images/moscot-logo.png"),
   mascotWelcome: require("@/assets/assets/images/mascot-welcome.png"),
+  mascotAuth: require("@/assets/assets/images/mascot-auth.png"),
 };
