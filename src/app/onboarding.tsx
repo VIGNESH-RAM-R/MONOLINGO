@@ -1,6 +1,8 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useRouter } from "expo-router";
+
 import { AppText } from "@/components/app-text";
 import { Flag, type FlagCode } from "@/components/flag";
 import { images } from "@/constants/images";
@@ -44,6 +46,8 @@ const BOOK_STACK: { label: string; bg: string }[] = [
 ];
 
 export default function Onboarding() {
+  const router = useRouter();
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View className="flex-1">
@@ -143,10 +147,7 @@ export default function Onboarding() {
             activeOpacity={0.85}
             className="w-full flex-row items-center justify-center gap-sm rounded-xl bg-lingo-purple py-md"
             style={shadows.raised}
-            onPress={() => {
-              // TODO: navigate to the auth screen once it exists —
-              // see prompts/04-authentication-ui.md.
-            }}
+            onPress={() => router.push("/sign-up")}
           >
             <AppText variant="h4" className="text-white">
               Get Started
