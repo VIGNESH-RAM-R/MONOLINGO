@@ -1,9 +1,114 @@
-:root {
-  --font-display:
-    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Segoe UI Symbol, Noto Color Emoji;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+/**
+ * Design tokens — source of truth: prompt_material/01-design-system.png
+ *
+ * These become NativeWind/Tailwind utilities automatically (Tailwind v4
+ * CSS-first theming, no tailwind.config.js). Keep this file and
+ * src/theme/*.ts in sync — src/theme is the same values as plain JS/TS
+ * constants for the StyleSheet-exception cases in AGENTS.md.
+ */
+@theme {
+  /* Typography — Poppins is the app-wide default (`font-sans`). RN can't
+     synthesize weights on a custom font, so pick the matching static file
+     per weight instead of relying on `font-weight`. */
+  --font-sans: "Poppins-Regular";
+  --font-poppins-regular: "Poppins-Regular";
+  --font-poppins-medium: "Poppins-Medium";
+  --font-poppins-semibold: "Poppins-SemiBold";
+  --font-poppins-bold: "Poppins-Bold";
+
+  /* Colors — Primary */
+  --color-mono-orange: #ff8a00;
+  --color-lingo-purple: #6c4ef5;
+  --color-lingo-blue: #4d8bff;
+  --color-progress-green: #21c16b;
+
+  /* Colors — Semantic */
+  --color-success: #21c16b;
+  --color-warning: #ffc800;
+  --color-streak: #ff8a00;
+  --color-error: #ff4d4f;
+  --color-info: #4d8bff;
+
+  /* Colors — Neutrals */
+  --color-text-primary: #0d132b;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+  --color-surface: #f6f7fb;
+  --color-background: #ffffff;
+
+  /* Spacing — 4px grid. Not specified in the design-system reference;
+     revisit against real screen designs as they're implemented. */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  /* Radius. Not specified in the design-system reference; revisit against
+     real screen designs as they're implemented. */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+/**
+ * Type ramp — one class per style, size + line-height + weight bundled
+ * together so screens just write className="h1" instead of pairing a size
+ * utility with a font-poppins-* weight utility.
+ */
+@utility h1 {
+  /* Page / Screen Title */
+  font-size: 32px;
+  line-height: 1.2;
+  font-family: var(--font-poppins-bold);
+}
+@utility h2 {
+  /* Section Title */
+  font-size: 24px;
+  line-height: 1.3;
+  font-family: var(--font-poppins-semibold);
+}
+@utility h3 {
+  /* Card / Module Title */
+  font-size: 20px;
+  line-height: 1.3;
+  font-family: var(--font-poppins-semibold);
+}
+@utility h4 {
+  /* Subheading */
+  font-size: 16px;
+  line-height: 1.4;
+  font-family: var(--font-poppins-medium);
+}
+@utility body-lg {
+  /* Important content */
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: var(--font-poppins-regular);
+}
+@utility body-md {
+  /* Body text */
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: var(--font-poppins-regular);
+}
+@utility body-sm {
+  /* Supporting text */
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: var(--font-poppins-regular);
+}
+@utility caption {
+  /* Labels, meta text */
+  font-size: 11px;
+  line-height: 1.4;
+  font-family: var(--font-poppins-regular);
 }
