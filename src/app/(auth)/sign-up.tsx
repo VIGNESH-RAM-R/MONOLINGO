@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useSignUp } from "@clerk/expo";
 import { Link } from "expo-router";
 
 import { AppText } from "@/components/app-text";
@@ -10,12 +11,26 @@ import { JourneyFooter } from "@/components/journey-footer";
 import { SocialButton } from "@/components/social-button";
 import { TextField } from "@/components/text-field";
 import { VerificationModal } from "@/components/verification-modal";
+import { useSocialSignIn } from "@/hooks/use-social-sign-in";
 import { shadows } from "@/theme";
 
 export default function SignUp() {
+  const { signUp, errors, fetchStatus } = useSignUp();
+  const signInWithProvider = useSocialSignIn();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [verificationVisible, setVerificationVisible] = useState(false);
+
+  async function handleSignUp() {
+    const { error } = await signUp.password({ emailAddress: email, password });
+    if (error) return; // surfaced via errors.fields below
+
+    const { error: sendError } = await signUp.verifications.sendEmailCode();
+    if (sendError) return;
+
+    setVerificationVisible(true);
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -27,35 +42,60 @@ export default function SignUp() {
         />
 
         <View className="gap-md px-lg mt-lg">
-          <TextField
-            icon="mail-outline"
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="alex@gmail.com"
-            keyboardType="email-address"
-            autoCorrect={false}
-          />
-          <TextField
-            icon="lock-closed-outline"
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="••••••••"
-            secureTextEntry
-          />
+          <View>
+            <TextField
+              icon="mail-outline"
+              label="Email"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="alex@gmail.com"
+              keyboardType="email-address"
+              autoCorrect={false}
+            />
+            {errors.fields.emailAddress && (
+              <AppText variant="bodySmall" className="text-error mt-xs">
+                {errors.fields.emailAddress.message}
+              </AppText>
+            )}
+          </View>
+          <View>
+            <TextField
+              icon="lock-closed-outline"
+              label="Password"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••"
+              secureTextEntry
+            />
+            {errors.fields.password && (
+              <AppText variant="bodySmall" className="text-error mt-xs">
+                {errors.fields.password.message}
+              </AppText>
+            )}
+          </View>
+
+          {errors.global?.[0] && (
+            <AppText variant="bodySmall" className="text-error">
+              {errors.global[0].message}
+            </AppText>
+          )}
 
           <TouchableOpacity
             activeOpacity={0.85}
             className="flex-row items-center justify-center gap-sm rounded-xl bg-lingo-purple py-md"
             style={shadows.raised}
-            onPress={() => setVerificationVisible(true)}
+            onPress={handleSignUp}
+            disabled={fetchStatus === "fetching"}
           >
             <AppText variant="h4" className="text-white">
               Sign Up
             </AppText>
             <Text className="text-white text-[18px]">→</Text>
           </TouchableOpacity>
+
+          {/* Required for sign-up flows — Clerk's bot protection needs a
+              mount point to render an invisible CAPTCHA when triggered. */}
+          <View nativeID="clerk-captcha" />
 
           <View className="flex-row items-center gap-sm">
             <View className="flex-1 h-px bg-border" />
@@ -65,9 +105,9 @@ export default function SignUp() {
             <View className="flex-1 h-px bg-border" />
           </View>
 
-          <SocialButton provider="google" />
-          <SocialButton provider="facebook" />
-          <SocialButton provider="apple" />
+          <SocialButton provider="google" onPress={() => signInWithProvider("google")} />
+          <SocialButton provider="facebook" onPress={() => signInWithProvider("facebook")} />
+          <SocialButton provider="apple" onPress={() => signInWithProvider("apple")} />
 
           <View className="flex-row items-center justify-center gap-xs mt-sm">
             <AppText variant="bodyMedium" className="text-text-secondary">
@@ -89,6 +129,7 @@ export default function SignUp() {
       <VerificationModal
         visible={verificationVisible}
         email={email || "your email"}
+        mode="sign-up"
         onClose={() => setVerificationVisible(false)}
       />
     </SafeAreaView>
