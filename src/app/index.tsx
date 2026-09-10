@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity, View } from "react-native";
 
 import { useClerk } from "@clerk/expo";
-import { Redirect } from "expo-router";
+import { Link, Redirect } from "expo-router";
 
 import { useAuthDestination } from "@/lib/auth-navigation";
 
@@ -25,6 +25,15 @@ export default function Index() {
       <TouchableOpacity className="mt-lg rounded-lg bg-lingo-purple px-lg py-sm" onPress={() => signOut()}>
         <Text className="text-white font-poppins-semibold">Sign Out</Text>
       </TouchableOpacity>
+
+      {/* Dev convenience: there's no Zustand store yet (prompts/08-zustand.md),
+          so nothing actually remembers a picked language — this is the only
+          way back to the picker to re-test it until that lands. */}
+      <Link href="/language-selection" asChild>
+        <TouchableOpacity className="mt-sm">
+          <Text className="text-text-secondary underline">Change language</Text>
+        </TouchableOpacity>
+      </Link>
     </View>
   );
 }
