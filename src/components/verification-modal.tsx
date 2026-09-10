@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, Pressable, TextInput, TouchableOpacity, View } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
+import { useSignIn, useSignUp } from "@clerk/expo";
 import { useRouter } from "expo-router";
 
 import { AppText } from "@/components/app-text";
 import { cn } from "@/lib/cn";
+import { type AuthHref, getPostAuthHref } from "@/lib/auth-navigation";
 import { colors, shadows } from "@/theme";
 
 const CODE_LENGTH = 6;
@@ -13,24 +15,33 @@ const CODE_LENGTH = 6;
 type VerificationModalProps = {
   visible: boolean;
   email: string;
+  /** Which Clerk attempt this code verifies — sign-up uses email/password + a
+   *  code, sign-in here is email + code only (see the screens for why). */
+  mode: "sign-up" | "sign-in";
   onClose: () => void;
 };
 
 /**
  * Bottom-sheet modal for entering the 6-digit email verification code —
- * see prompts/04-authentication-ui.md. This is UI-only for now: it mocks the
- * "code sent" flow and navigates home once all 6 digits are entered. Real
- * Clerk verification wires into this same modal in prompts/05-clerk.md.
+ * see prompts/04-authentication-ui.md. Wired to real Clerk verification in
+ * prompts/05-clerk.md: the screen sends the code before opening this modal,
+ * and this modal verifies it and finalizes the sign-up/sign-in, navigating
+ * home only once Clerk confirms success.
  *
  * The visible boxes are just a display — a single invisible TextInput
  * (absolutely positioned, opacity 0) actually receives the number-pad
  * input, which is the standard way to build an OTP field without a
  * per-digit-input focus dance.
  */
-export function VerificationModal({ visible, email, onClose }: VerificationModalProps) {
+export function VerificationModal({ visible, email, mode, onClose }: VerificationModalProps) {
   const router = useRouter();
   const inputRef = useRef<TextInput>(null);
   const [code, setCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
+
+  const { signUp } = useSignUp();
+  const { signIn } = useSignIn();
 
   useEffect(() => {
     if (!visible) return;
@@ -39,27 +50,85 @@ export function VerificationModal({ visible, email, onClose }: VerificationModal
     // focus, otherwise the keyboard fails to show on iOS.
     const timeout = setTimeout(() => {
       setCode("");
+      setError(null);
       inputRef.current?.focus();
     }, 300);
     return () => clearTimeout(timeout);
   }, [visible]);
 
-  function handleChangeCode(next: string) {
-    const digits = next.replace(/[^0-9]/g, "").slice(0, CODE_LENGTH);
-    setCode(digits);
-
-    if (digits.length === CODE_LENGTH) {
-      router.replace("/");
+  // Decorates the destination for Safari's Intelligent Tracking Prevention
+  // (relevant on Expo web) and navigates. See the `finalize()` docs:
+  // https://clerk.com/docs/reference/objects/sign-in-future#finalize
+  function goTo(decorateUrl: (url: string) => string, href: AuthHref) {
+    const url = decorateUrl(href);
+    if (url.startsWith("http")) {
+      // decorateUrl returned an absolute URL for Safari ITP — the plain
+      // `href` above is no longer enough, this exact URL must be visited.
+      if (typeof window !== "undefined") window.location.href = url;
+    } else {
+      router.replace(href);
     }
   }
 
+  async function handleChangeCode(next: string) {
+    const digits = next.replace(/[^0-9]/g, "").slice(0, CODE_LENGTH);
+    setCode(digits);
+    setError(null);
+
+    if (digits.length !== CODE_LENGTH) return;
+
+    setVerifying(true);
+    try {
+      if (mode === "sign-up") {
+        const { error: verifyError } = await signUp.verifications.verifyEmailCode({ code: digits });
+        if (verifyError) {
+          setError("That code didn't work. Please try again.");
+          setCode("");
+          return;
+        }
+        if (signUp.status === "complete") {
+          // Session tasks (e.g. forced MFA enrollment) aren't built yet —
+          // fall back to home rather than leaving the user stuck on nothing.
+          await signUp.finalize({
+            navigate: ({ session, decorateUrl }) =>
+              goTo(decorateUrl, session.currentTask ? "/" : getPostAuthHref()),
+          });
+        }
+      } else {
+        const { error: verifyError } = await signIn.emailCode.verifyCode({ code: digits });
+        if (verifyError) {
+          setError("That code didn't work. Please try again.");
+          setCode("");
+          return;
+        }
+        if (signIn.status === "complete") {
+          await signIn.finalize({
+            navigate: ({ session, decorateUrl }) =>
+              goTo(decorateUrl, session.currentTask ? "/" : getPostAuthHref()),
+          });
+        }
+      }
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  function handleClose() {
+    if (mode === "sign-up") {
+      signUp.reset();
+    } else {
+      signIn.reset();
+    }
+    onClose();
+  }
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <KeyboardAvoidingView
         style={{ flex: 1, justifyContent: "flex-end" }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <Pressable className="absolute inset-0 bg-black/40" onPress={onClose} />
+        <Pressable className="absolute inset-0 bg-black/40" onPress={handleClose} />
 
         <View className="gap-md rounded-t-2xl bg-white px-lg pt-lg pb-xl" style={shadows.overlay}>
           <View className="flex-row items-start justify-between">
@@ -69,7 +138,7 @@ export function VerificationModal({ visible, email, onClose }: VerificationModal
                 We&apos;ve sent a 6-digit code to {email}. Enter it below to continue.
               </AppText>
             </View>
-            <TouchableOpacity onPress={onClose} hitSlop={8}>
+            <TouchableOpacity onPress={handleClose} hitSlop={8}>
               <Ionicons name="close" size={24} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
@@ -85,7 +154,7 @@ export function VerificationModal({ visible, email, onClose }: VerificationModal
                 accessible={false}
                 className={cn(
                   "w-12 h-14 items-center justify-center rounded-xl border-2 bg-surface",
-                  index === code.length ? "border-lingo-purple" : "border-border"
+                  error ? "border-error" : index === code.length ? "border-lingo-purple" : "border-border"
                 )}
               >
                 <AppText variant="h2">{code[index] ?? ""}</AppText>
@@ -93,10 +162,17 @@ export function VerificationModal({ visible, email, onClose }: VerificationModal
             ))}
           </Pressable>
 
+          {error && (
+            <AppText variant="bodySmall" className="text-error">
+              {error}
+            </AppText>
+          )}
+
           <TextInput
             ref={inputRef}
             value={code}
             onChangeText={handleChangeCode}
+            editable={!verifying}
             accessibilityLabel="6-digit verification code"
             keyboardType="number-pad"
             maxLength={CODE_LENGTH}
