@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 
 import { AppText } from "@/components/app-text";
 import { images } from "@/constants/images";
+import { asHref } from "@/lib/auth-navigation";
 import { colors } from "@/theme";
 
 type AuthHeroProps = {
@@ -28,7 +29,7 @@ export function AuthHero({ title, subtitle, bubbleText }: AuthHeroProps) {
           if (router.canGoBack()) {
             router.back();
           } else {
-            router.replace("/");
+            router.replace(asHref("/"));
           }
         }}
         hitSlop={12}
