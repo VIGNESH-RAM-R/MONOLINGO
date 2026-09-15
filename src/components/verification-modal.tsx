@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 
 import { AppText } from "@/components/app-text";
 import { cn } from "@/lib/cn";
-import { type AuthHref, getPostAuthHref } from "@/lib/auth-navigation";
+import { asHref, type AuthHref, getPostAuthHref } from "@/lib/auth-navigation";
 import { colors, shadows } from "@/theme";
 
 const CODE_LENGTH = 6;
@@ -66,7 +66,7 @@ export function VerificationModal({ visible, email, mode, onClose }: Verificatio
       // `href` above is no longer enough, this exact URL must be visited.
       if (typeof window !== "undefined") window.location.href = url;
     } else {
-      router.replace(href);
+      router.replace(asHref(href));
     }
   }
 

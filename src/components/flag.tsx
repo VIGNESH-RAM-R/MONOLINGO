@@ -50,22 +50,7 @@ export function Flag({ code, className, size = SIZE }: FlagProps) {
           <View className="flex-1 bg-[#FFCE00]" />
         </View>
       )}
-      {code === "in" && (
-        <View className="flex-1">
-          <View className="flex-1 bg-[#FF9933]" />
-          <View className="flex-1 bg-white items-center justify-center">
-            {/* Ashoka Chakra, standing in for the 24-spoke wheel — the glyph
-                is the closest single character to it, sized off the swatch's
-                own height so it still reads at both the small (onboarding
-                bubble) and large (language card) sizes. A dynamic style per
-                AGENTS.md's "Dynamic styles" exception. */}
-            <Text style={{ color: "#000080", fontSize: size.height * 0.55, lineHeight: size.height * 0.6 }}>
-              ☸
-            </Text>
-          </View>
-          <View className="flex-1 bg-[#138808]" />
-        </View>
-      )}
+      {code === "in" && <IndiaFlag height={size.height} />}
       {code === "jp" && (
         <View className="flex-1 bg-white items-center justify-center">
           <View className="rounded-full bg-[#BC002D]" style={{ width: "45%", height: "45%" }} />
@@ -87,6 +72,66 @@ export function Flag({ code, className, size = SIZE }: FlagProps) {
           <View className="absolute bg-[#C8102E]" style={{ width: 2, height: "100%" }} />
         </View>
       )}
+    </View>
+  );
+}
+
+const CHAKRA_NAVY = "#000080";
+/** The real Ashoka Chakra has 24 evenly-spaced spokes. */
+const CHAKRA_SPOKE_ANGLES = Array.from({ length: 24 }, (_, i) => i * 15);
+
+/**
+ * India's flag — saffron/white/green bands with a full 24-spoke Ashoka
+ * Chakra, built the same "plain Views, no glyph" way as the rest of this
+ * file (see the doc comment on `Flag` above for why). Shared by Hindi,
+ * Kannada, Telugu, and Malayalam, which all use this flag.
+ */
+function IndiaFlag({ height }: { height: number }) {
+  // Sized off the swatch's own height so it still reads at both the small
+  // (onboarding-bubble) and large (language-card) sizes — a dynamic style
+  // per AGENTS.md's "Dynamic styles" exception.
+  const diameter = Math.max(6, height * 0.55);
+  const ringWidth = Math.max(1, diameter * 0.08);
+  const spokeWidth = Math.max(0.75, diameter * 0.045);
+  const hubDiameter = Math.max(1.5, diameter * 0.16);
+
+  return (
+    <View className="flex-1">
+      <View className="flex-1 bg-[#FF9933]" />
+      <View className="flex-1 bg-white items-center justify-center">
+        <View style={{ width: diameter, height: diameter }}>
+          <View
+            className="absolute rounded-full"
+            style={{ width: diameter, height: diameter, borderWidth: ringWidth, borderColor: CHAKRA_NAVY }}
+          />
+          {CHAKRA_SPOKE_ANGLES.map((angle) => (
+            <View
+              key={angle}
+              className="absolute"
+              style={{
+                width: spokeWidth,
+                height: diameter / 2,
+                left: diameter / 2 - spokeWidth / 2,
+                top: 0,
+                backgroundColor: CHAKRA_NAVY,
+                transformOrigin: "bottom",
+                transform: [{ rotate: `${angle}deg` }],
+              }}
+            />
+          ))}
+          <View
+            className="absolute rounded-full"
+            style={{
+              width: hubDiameter,
+              height: hubDiameter,
+              left: diameter / 2 - hubDiameter / 2,
+              top: diameter / 2 - hubDiameter / 2,
+              backgroundColor: CHAKRA_NAVY,
+            }}
+          />
+        </View>
+      </View>
+      <View className="flex-1 bg-[#138808]" />
     </View>
   );
 }
