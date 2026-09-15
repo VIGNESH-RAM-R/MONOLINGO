@@ -8,6 +8,7 @@ import { ClerkProvider, useAuth, useClerk } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 
 import { SELECTED_LANGUAGE_STORAGE_KEY, useLanguageStore } from "@/store/language-store";
+import { useLearningProgressStore } from "@/store/learning-progress-store";
 import { fontAssets } from "@/theme/fonts";
 import "../global.css";
 
@@ -38,7 +39,7 @@ export default function RootLayout() {
   // render entirely.
   useEffect(() => {
     async function hydrateLanguageStore() {
-      await useLanguageStore.persist.rehydrate();
+      await Promise.all([useLanguageStore.persist.rehydrate(), useLearningProgressStore.persist.rehydrate()]);
 
       // Dev-only, and chained *after* the rehydrate above (not a separate
       // effect) so it always wins regardless of effect-ordering: this
