@@ -116,7 +116,7 @@ function PostHogIdentity() {
     if (!isAuthLoaded || !isUserLoaded) return;
 
     if (!isSignedIn || !userId) {
-      if (wasSignedIn.current) {
+      if (wasSignedIn.current !== false) {
         posthog.reset();
         identifiedUserId.current = null;
       }

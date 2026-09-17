@@ -4,8 +4,6 @@
 
 Copy page
 
-# Identify users - Docs
-
 Linking events to specific users enables you to build a full picture of how they're using your product across different sessions, devices, and platforms.
 
 This is straightforward to do when [capturing backend events](/docs/product-analytics/capture-events?tab=Node.js.md), as you associate events to a specific user using a `distinct_id`, which is a required argument.
@@ -15,6 +13,8 @@ However, in the frontend of a [web](/docs/libraries/js/usage.md#capturing-events
 To link events to specific users, call `identify`:
 
 PostHog AI
+
+## Platform examples
 
 ### Web
 
@@ -204,7 +204,7 @@ See our [person properties docs](/docs/product-analytics/person-properties.md) f
 
 ### 5\. Use deep links between platforms
 
-We recommend you call `identify` [as soon as you're able](#1-call-identify-as-soon-as-youre-able), typically when a user signs up or logs in.
+We recommend you call `identify` [as soon as you're able](#1-call-identify-as-soon-as-youre-able-to), typically when a user signs up or logs in.
 
 This doesn't work if one or both platforms are unauthenticated. Some examples of such cases are:
 
@@ -227,7 +227,7 @@ Here's an example implementation for handling deep links from web to mobile:
 
 PostHog AI
 
-### iOS
+### iOS deep-link example
 
 ```swift
 import PostHog
@@ -261,7 +261,7 @@ class DeepLinkIdentityManager {
 }
 ```
 
-### Android
+### Android deep-link example
 
 ```kotlin
 import android.net.Uri

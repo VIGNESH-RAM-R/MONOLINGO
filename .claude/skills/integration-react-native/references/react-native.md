@@ -4,15 +4,13 @@
 
 Copy page
 
-# React Native - Docs
-
 ## Installation
 
 Our React Native enables you to integrate PostHog with your React Native project. For React Native projects built with Expo, there are no mobile native dependencies outside of supported Expo packages.
 
 To install, add the `posthog-react-native` package to your project as well as the required peer dependencies.
 
-#### Expo apps
+### Expo apps
 
 Terminal
 
@@ -22,7 +20,7 @@ PostHog AI
 npx expo install posthog-react-native expo-file-system expo-application expo-device expo-localization
 ```
 
-#### React Native apps
+### React Native apps
 
 Terminal
 
@@ -34,7 +32,7 @@ yarn add posthog-react-native @react-native-async-storage/async-storage react-na
 npm i -s posthog-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize
 ```
 
-#### React Native Web and macOS
+### React Native Web and macOS
 
 If you're using [React Native Web](https://github.com/necolas/react-native-web) or [React Native macOS](https://github.com/microsoft/react-native-macos), do not use the [expo-file-system](https://github.com/expo/expo/tree/master/packages/expo-file-system) package since the Web and macOS targets aren't supported, use the [@react-native-async-storage/async-storage](https://github.com/react-native-async-storage/async-storage) package instead.
 
@@ -242,12 +240,12 @@ You can further customize how PostHog works through its configuration on initial
 
 | Attribute | Description |
 | --- | --- |
-| hostType: StringDefault: https://us.i.posthog.com | PostHog API host (usually https://us.i.posthog.com by default or https://eu.i.posthog.com). Host is optional if you use https://us.i.posthog.com. |
-| flushAtType: NumberDefault: 20 | The number of events to queue before sending to PostHog (flushing). |
-| flushIntervalType: NumberDefault: 10000 | The interval in milliseconds between periodic flushes. |
-| maxBatchSizeType: NumberDefault: 100 | The maximum number of queued messages to be flushed as part of a single batch (must be higher than flushAt). |
-| maxQueueSizeType: NumberDefault: 1000 | The maximum number of cached messages either in memory or on the local storage (must be higher than flushAt). |
-| disabledType: BooleanDefault: false | If set to true, the SDK is essentially disabled (useful for local environments where you don't want to track anything). |
+| `host`<br>Type: `String`<br>Default: `https://us.i.posthog.com` | PostHog API host (usually https://us.i.posthog.com by default or https://eu.i.posthog.com). Host is optional if you use https://us.i.posthog.com. |
+| `flushAt`<br>Type: `Number`<br>Default: `20` | The number of events to queue before sending to PostHog (flushing). |
+| `flushInterval`<br>Type: `Number`<br>Default: `10000` | The interval in milliseconds between periodic flushes. |
+| `maxBatchSize`<br>Type: `Number`<br>Default: `100` | The maximum number of queued messages to be flushed as part of a single batch (must be higher than flushAt). |
+| `maxQueueSize`<br>Type: `Number`<br>Default: `1000` | The maximum number of cached messages either in memory or on the local storage (must be higher than flushAt). |
+| `disabled`<br>Type: `Boolean`<br>Default: `false` | If set to true, the SDK is essentially disabled (useful for local environments where you don't want to track anything). |
 | defaultOptInType: BooleanDefault: true | If set to false, the SDK will not track until the optIn() function is called. |
 | sendFeatureFlagEventType: BooleanDefault: true | Whether to track that getFeatureFlag was called (used by experiments). |
 | preloadFeatureFlagsType: BooleanDefault: true | Whether to load feature flags when initialized or not. |
@@ -271,7 +269,7 @@ You can further customize how PostHog works through its configuration on initial
 | before_sendType: FunctionDefault: undefined | A callback function that is called before each event is sent to PostHog. You can use it to modify, filter, or suppress events. Return null to drop the event, or return the modified event to send it. See [customizing exception capture](#customizing-exception-capture-with-before_send) for details. |
 | capturePushNotificationSubscriptionsType: BooleanDefault: true | Whether to automatically register this device's push token so [Workflows](/docs/workflows.md) can target it. Requires @posthog/react-native-plugin. See [push notifications](#push-notifications). Available in version 4.62.0+. |
 | capturePushNotificationOpenedType: BooleanDefault: true | Whether to automatically capture $push_notification_opened when the user taps a push notification. Requires @posthog/react-native-plugin. See [push notifications](#push-notifications). Available in version 4.62.0+. |
-| pushIdentityProviderType: FunctionDefault: undefined | Supplies a signed identity-verification token for push subscription requests. Only needed when your push channel requires identity verification. See [identity verification](#identity-verification). Available in version 4.62.0+. |
+| pushIdentityProviderType: FunctionDefault: undefined | Supplies a signed identity-verification token for push subscription requests. Only needed when your push channel requires identity verification. See [identity verification](/docs/workflows/push-notifications.md#identity-verification). Available in version 4.62.0+. |
 
 ### Tracing headers
 
@@ -775,7 +773,7 @@ posthog.register({
 
 The call above ensures that every event sent by the user will include `"icecream pref": "vanilla"` and `"team_id": 22`. This way, if you filtered events by property using `icecream_pref = vanilla`, it would display all events captured on that user after the `posthog.register` call, since they all include the specified Super Property.
 
-This does **not** set the user's properties. This only sets the properties for their events. To store person properties, see the [setting person properties section](#setting-user-properties).
+This does **not** set the user's properties. This only sets the properties for their events. To store person properties, see the [setting person properties section](#setting-person-properties).
 
 ### Removing stored super properties
 
@@ -786,7 +784,7 @@ JavaScript
 PostHog AI
 
 ```javascript
-posthog.unregister('icecream pref'),
+posthog.unregister('icecream pref')
 ```
 
 This will remove the super property and subsequent events will not include it.
@@ -915,7 +913,7 @@ const MyComponent = () => {
       // Do something
     }
     // Optional use the 'useFeatureFlagWithPayload' hook for fetching the feature flag payload
-    return <div/>
+    return null
 }
 ```
 
@@ -1364,7 +1362,7 @@ posthog.debug()
 
 ## Disabling for local development
 
-You may want to disable PostHog when working locally or in a test environment. You can do this by setting the `disable` option to `true` when initializing PostHog. Helpfully this allows you to continue using `usePostHog` and safely calling it without anything actually happening.
+You may want to disable PostHog when working locally or in a test environment. You can do this by setting the `disabled` option to `true` when initializing PostHog. Helpfully this allows you to continue using `usePostHog` and safely calling it without anything actually happening.
 
 React Native
 
@@ -1424,7 +1422,7 @@ await PostHog.setup('<ph_project_token>', {
 PostHog.capture("foo")
 // V2 Setup difference
 import PostHog from 'posthog-react-native'
-const posthog = await Posthog.initAsync('<ph_project_token>', {
+const posthog = await PostHog.initAsync('<ph_project_token>', {
     // usually 'https://us.i.posthog.com' or 'https://eu.i.posthog.com'
     host: 'https://us.i.posthog.com',
     // Add any other options here.

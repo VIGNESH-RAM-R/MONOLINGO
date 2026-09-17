@@ -71,6 +71,13 @@ export function VerificationModal({ visible, email, mode, onClose }: Verificatio
     }
   }
 
+  function identifyAndCaptureAuthenticationCompleted(userId: string | undefined) {
+    if (!posthog || !userId) return;
+
+    posthog.identify(userId);
+    posthog.capture("authentication_completed", { method: "email_code", mode });
+  }
+
   async function handleChangeCode(next: string) {
     const digits = next.replace(/[^0-9]/g, "").slice(0, CODE_LENGTH);
     setCode(digits);
@@ -91,10 +98,11 @@ export function VerificationModal({ visible, email, mode, onClose }: Verificatio
           // Session tasks (e.g. forced MFA enrollment) aren't built yet —
           // fall back to home rather than leaving the user stuck on nothing.
           await signUp.finalize({
-            navigate: ({ session, decorateUrl }) =>
-              goTo(decorateUrl, session.currentTask ? "/" : getPostAuthHref()),
+            navigate: ({ session, decorateUrl }) => {
+              identifyAndCaptureAuthenticationCompleted(session.user?.id ?? session.publicUserData.userId);
+              goTo(decorateUrl, session.currentTask ? "/" : getPostAuthHref());
+            },
           });
-          posthog?.capture("authentication_completed", { method: "email_code", mode });
         }
       } else {
         const { error: verifyError } = await signIn.emailCode.verifyCode({ code: digits });
@@ -105,10 +113,11 @@ export function VerificationModal({ visible, email, mode, onClose }: Verificatio
         }
         if (signIn.status === "complete") {
           await signIn.finalize({
-            navigate: ({ session, decorateUrl }) =>
-              goTo(decorateUrl, session.currentTask ? "/" : getPostAuthHref()),
+            navigate: ({ session, decorateUrl }) => {
+              identifyAndCaptureAuthenticationCompleted(session.user?.id ?? session.publicUserData.userId);
+              goTo(decorateUrl, session.currentTask ? "/" : getPostAuthHref());
+            },
           });
-          posthog?.capture("authentication_completed", { method: "email_code", mode });
         }
       }
     } finally {
