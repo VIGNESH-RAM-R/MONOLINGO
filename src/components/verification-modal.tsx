@@ -6,6 +6,7 @@ import { useSignIn, useSignUp } from "@clerk/expo";
 import { useRouter } from "expo-router";
 
 import { AppText } from "@/components/app-text";
+import { posthog } from "@/config/posthog";
 import { cn } from "@/lib/cn";
 import { asHref, type AuthHref, getPostAuthHref } from "@/lib/auth-navigation";
 import { colors, shadows } from "@/theme";
@@ -93,6 +94,7 @@ export function VerificationModal({ visible, email, mode, onClose }: Verificatio
             navigate: ({ session, decorateUrl }) =>
               goTo(decorateUrl, session.currentTask ? "/" : getPostAuthHref()),
           });
+          posthog?.capture("authentication_completed", { method: "email_code", mode });
         }
       } else {
         const { error: verifyError } = await signIn.emailCode.verifyCode({ code: digits });
@@ -106,6 +108,7 @@ export function VerificationModal({ visible, email, mode, onClose }: Verificatio
             navigate: ({ session, decorateUrl }) =>
               goTo(decorateUrl, session.currentTask ? "/" : getPostAuthHref()),
           });
+          posthog?.capture("authentication_completed", { method: "email_code", mode });
         }
       }
     } finally {

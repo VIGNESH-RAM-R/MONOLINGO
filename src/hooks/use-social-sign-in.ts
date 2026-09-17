@@ -9,6 +9,7 @@ import { useSSO } from "@clerk/expo/experimental";
 import { useRouter } from "expo-router";
 
 import type { SocialProvider } from "@/components/social-button";
+import { posthog } from "@/config/posthog";
 import { asHref, getPostAuthHref } from "@/lib/auth-navigation";
 
 const STRATEGY_BY_PROVIDER: Record<SocialProvider, "oauth_google" | "oauth_facebook" | "oauth_apple"> = {
@@ -42,6 +43,7 @@ export function useSocialSignIn() {
       }
 
       try {
+        posthog?.capture("social_sign_in_started", { provider });
         const { createdSessionId } = await startSSOFlow({
           strategy: STRATEGY_BY_PROVIDER[provider],
         });

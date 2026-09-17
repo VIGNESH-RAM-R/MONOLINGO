@@ -2,11 +2,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { Text, View } from "react-native";
+import { PostHogErrorBoundary, PostHogProvider, usePostHog } from "posthog-react-native";
 import { useEffect, useRef } from "react";
 
-import { ClerkProvider, useAuth, useClerk } from "@clerk/expo";
+import { ClerkProvider, useAuth, useClerk, useUser } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 
+import { posthog } from "@/config/posthog";
 import { SELECTED_LANGUAGE_STORAGE_KEY, useLanguageStore } from "@/store/language-store";
 import { useLearningProgressStore } from "@/store/learning-progress-store";
 import { fontAssets } from "@/theme/fonts";
@@ -60,8 +63,8 @@ export default function RootLayout() {
     return null;
   }
 
-  return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+  const routes = (
+    <>
       <DevAutoSignOut />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -69,8 +72,78 @@ export default function RootLayout() {
         <Stack.Screen name="language-selection" options={{ headerShown: false }} />
         <Stack.Screen name="sso-callback" options={{ headerShown: false }} />
       </Stack>
+    </>
+  );
+
+  return (
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      {posthog ? (
+        <PostHogProvider client={posthog}>
+          <PostHogErrorBoundary fallback={PostHogErrorFallback}>
+            <PostHogIdentity />
+            {routes}
+          </PostHogErrorBoundary>
+        </PostHogProvider>
+      ) : (
+        routes
+      )}
     </ClerkProvider>
   );
+}
+
+function PostHogErrorFallback() {
+  return (
+    <View>
+      <Text>Something went wrong. Please restart the app.</Text>
+    </View>
+  );
+}
+
+/**
+ * Keeps PostHog's persisted client identity aligned with Clerk's session.
+ * Clerk user IDs are immutable account identifiers, unlike profile fields such
+ * as an email address. Identifying here means all later client events and
+ * exceptions inherit the active user without repeating identity at call sites.
+ */
+function PostHogIdentity() {
+  const { isLoaded: isAuthLoaded, isSignedIn, userId } = useAuth();
+  const { isLoaded: isUserLoaded, user } = useUser();
+  const posthog = usePostHog();
+  const identifiedUserId = useRef<string | null>(null);
+  const wasSignedIn = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (!isAuthLoaded || !isUserLoaded) return;
+
+    if (!isSignedIn || !userId) {
+      if (wasSignedIn.current) {
+        posthog.reset();
+        identifiedUserId.current = null;
+      }
+      wasSignedIn.current = false;
+      return;
+    }
+
+    wasSignedIn.current = true;
+    if (identifiedUserId.current === userId) return;
+
+    if (identifiedUserId.current) {
+      posthog.reset();
+    }
+
+    posthog.identify(userId, {
+      $set: {
+        ...(user?.primaryEmailAddress?.emailAddress
+          ? { email: user.primaryEmailAddress.emailAddress }
+          : {}),
+        ...(user?.firstName ? { first_name: user.firstName } : {}),
+        ...(user?.lastName ? { last_name: user.lastName } : {}),
+      },
+    });
+    identifiedUserId.current = userId;
+  }, [isAuthLoaded, isSignedIn, isUserLoaded, posthog, user, userId]);
+
+  return null;
 }
 
 /**
