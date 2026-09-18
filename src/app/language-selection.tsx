@@ -8,6 +8,7 @@ import { Redirect, useRouter } from "expo-router";
 
 import { AppText } from "@/components/app-text";
 import { LanguageCard } from "@/components/language-card";
+import { posthog } from "@/config/posthog";
 import { images } from "@/constants/images";
 import { languages } from "@/data/languages";
 import { asHref, useAuthDestination } from "@/lib/auth-navigation";
@@ -155,6 +156,7 @@ export default function LanguageSelection() {
           style={shadows.raised}
           onPress={() => {
             if (!selected) return;
+            posthog?.capture("language_selected", { language_code: selected });
             setSelectedLanguage(selected);
             router.replace(asHref("/"));
           }}

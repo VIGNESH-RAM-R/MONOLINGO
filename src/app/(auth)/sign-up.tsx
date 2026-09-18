@@ -11,6 +11,7 @@ import { JourneyFooter } from "@/components/journey-footer";
 import { SocialButton } from "@/components/social-button";
 import { TextField } from "@/components/text-field";
 import { VerificationModal } from "@/components/verification-modal";
+import { posthog } from "@/config/posthog";
 import { useSocialSignIn } from "@/hooks/use-social-sign-in";
 import { shadows } from "@/theme";
 
@@ -29,6 +30,7 @@ export default function SignUp() {
     const { error: sendError } = await signUp.verifications.sendEmailCode();
     if (sendError) return;
 
+    posthog?.capture("sign_up_verification_requested");
     setVerificationVisible(true);
   }
 

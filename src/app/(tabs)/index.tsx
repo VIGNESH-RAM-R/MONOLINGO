@@ -9,6 +9,7 @@ import { Redirect, useRouter } from "expo-router";
 
 import { AppText } from "@/components/app-text";
 import { Flag } from "@/components/flag";
+import { posthog } from "@/config/posthog";
 import { images } from "@/constants/images";
 import { getLanguageByCode } from "@/data/languages";
 import { getLessonById, getLessonsForLanguage } from "@/data/lessons";
@@ -266,7 +267,10 @@ export default function Index() {
             title="AI Speaking"
             subtitle="Practice with Mono"
             checked={false}
-            onPress={() => router.push("/ai-teacher")}
+            onPress={() => {
+              posthog?.capture("ai_conversation_started", { entry_point: "adventure_row" });
+              router.push("/ai-teacher");
+            }}
           />
           <AdventureRow
             icon={<MaterialCommunityIcons name="brain" size={20} color="#fff" />}
@@ -297,7 +301,10 @@ export default function Index() {
             <TouchableOpacity
               activeOpacity={0.85}
               className="flex-row items-center gap-1 self-start rounded-full bg-success px-md py-sm mt-md"
-              onPress={() => router.push("/ai-teacher")}
+              onPress={() => {
+                posthog?.capture("ai_conversation_started", { entry_point: "home_cta" });
+                router.push("/ai-teacher");
+              }}
             >
               <Ionicons name="mic" size={16} color="#fff" />
               <AppText variant="h4" className="text-white">

@@ -35,6 +35,76 @@ export const units: Unit[] = [
       "Learn everyday greetings, conversations, and useful phrases to start speaking with confidence.",
     imageUrl: "https://picsum.photos/seed/monolingo-cn-unit-1/800/600",
   },
+  {
+    id: "de-unit-1",
+    languageCode: "de",
+    order: 1,
+    title: "Everyday Basics",
+    tagline: "Kleine Gespräche, große Horizonte!",
+    description:
+      "Learn everyday greetings, conversations, and useful phrases to start speaking with confidence.",
+    imageUrl: "https://picsum.photos/seed/monolingo-de-unit-1/800/600",
+  },
+  {
+    id: "hi-unit-1",
+    languageCode: "hi",
+    order: 1,
+    title: "Everyday Basics",
+    tagline: "छोटी बातचीत, बड़े क्षितिज!",
+    description:
+      "Learn everyday greetings, conversations, and useful phrases to start speaking with confidence.",
+    imageUrl: "https://picsum.photos/seed/monolingo-hi-unit-1/800/600",
+  },
+  {
+    id: "kn-unit-1",
+    languageCode: "kn",
+    order: 1,
+    title: "Everyday Basics",
+    tagline: "ಚಿಕ್ಕ ಸಂಭಾಷಣೆಗಳು, ದೊಡ್ಡ ಪರಿಧಿಗಳು!",
+    description:
+      "Learn everyday greetings, conversations, and useful phrases to start speaking with confidence.",
+    imageUrl: "https://picsum.photos/seed/monolingo-kn-unit-1/800/600",
+  },
+  {
+    id: "ja-unit-1",
+    languageCode: "ja",
+    order: 1,
+    title: "Everyday Basics",
+    tagline: "小さな会話、大きな地平線！",
+    description:
+      "Learn everyday greetings, conversations, and useful phrases to start speaking with confidence.",
+    imageUrl: "https://picsum.photos/seed/monolingo-ja-unit-1/800/600",
+  },
+  {
+    id: "ko-unit-1",
+    languageCode: "ko",
+    order: 1,
+    title: "Everyday Basics",
+    tagline: "작은 대화, 큰 지평선!",
+    description:
+      "Learn everyday greetings, conversations, and useful phrases to start speaking with confidence.",
+    imageUrl: "https://picsum.photos/seed/monolingo-ko-unit-1/800/600",
+  },
+  {
+    id: "te-unit-1",
+    languageCode: "te",
+    order: 1,
+    title: "Everyday Basics",
+    tagline: "చిన్న సంభాషణలు, పెద్ద క్షితిజాలు!",
+    description:
+      "Learn everyday greetings, conversations, and useful phrases to start speaking with confidence.",
+    imageUrl: "https://picsum.photos/seed/monolingo-te-unit-1/800/600",
+  },
+  {
+    id: "ml-unit-1",
+    languageCode: "ml",
+    order: 1,
+    title: "Everyday Basics",
+    tagline: "ചെറിയ സംഭാഷണങ്ങൾ, വലിയ ചക്രവാളങ്ങൾ!",
+    description:
+      "Learn everyday greetings, conversations, and useful phrases to start speaking with confidence.",
+    imageUrl: "https://picsum.photos/seed/monolingo-ml-unit-1/800/600",
+  },
 ];
 
 export function getUnitsForLanguage(languageCode: LanguageCode): Unit[] {

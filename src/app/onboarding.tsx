@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import { AppText } from "@/components/app-text";
+import { posthog } from "@/config/posthog";
 import { Flag, type FlagCode } from "@/components/flag";
 import { images } from "@/constants/images";
 import { cn } from "@/lib/cn";
@@ -147,7 +148,10 @@ export default function Onboarding() {
             activeOpacity={0.85}
             className="w-full flex-row items-center justify-center gap-sm rounded-xl bg-lingo-purple py-md"
             style={shadows.raised}
-            onPress={() => router.push("/sign-up")}
+            onPress={() => {
+              posthog?.capture("onboarding_started");
+              router.push("/sign-up");
+            }}
           >
             <AppText variant="h4" className="text-white">
               Get Started
