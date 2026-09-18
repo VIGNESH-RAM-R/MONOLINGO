@@ -70,6 +70,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="language-selection" options={{ headerShown: false }} />
+        <Stack.Screen name="lesson/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="sso-callback" options={{ headerShown: false }} />
       </Stack>
     </>
@@ -91,10 +92,19 @@ export default function RootLayout() {
   );
 }
 
-function PostHogErrorFallback() {
+function PostHogErrorFallback({ error, componentStack }: { error: unknown; componentStack: string }) {
+  // TEMPORARY: surfaces the real crash on-device instead of a generic
+  // message, so it can be read off a phone where Metro's terminal/LogBox
+  // isn't visible. Revert to the plain message once the cause is found.
   return (
-    <View>
-      <Text>Something went wrong. Please restart the app.</Text>
+    <View style={{ flex: 1, padding: 24, paddingTop: 64, backgroundColor: "#fff" }}>
+      <Text style={{ fontWeight: "bold", marginBottom: 12 }}>Something went wrong.</Text>
+      <Text selectable style={{ marginBottom: 12 }}>
+        {error instanceof Error ? `${error.name}: ${error.message}` : String(error)}
+      </Text>
+      <Text selectable style={{ fontSize: 11, color: "#666" }}>
+        {componentStack}
+      </Text>
     </View>
   );
 }
